@@ -16,8 +16,46 @@
 
 #define TAM_LINHA 32
 
+char * ler_linha (FILE *fp)
+{
+  size_t tamanho_atual = TAM_LINHA;
 
-char *ler_linha(FILE *fp){
- 
- 
+  char*linha = NULL;
+
+  while(1)
+  {
+    linha = realloc (linha, tamanho_atual);
+    
+    assert(linha != NULL);
+    
+    if(ungetc(getc(fp), fp)==EOF)
+    {
+      free(linha);
+      return NULL;
+    }
+    
+    fgets(linha,tamanho_atual, fp);
+
+    char*fim_linha = strstr(linha, "\n");
+    
+    if(fim_linha)
+    {
+      *fim_linha = '\0';
+      return linha;
+    }
+    else
+    {
+      if(ungetc(getc(fp), fp)==EOF)
+      {
+        return linha;
+      }
+      else
+      {
+        assert(fseek(fp, 1-tamanho_atual, SEEK_CUR)==0);
+        tamanho_atual *= 2;       
+      }
+    }      
+  }
 }
+
+
